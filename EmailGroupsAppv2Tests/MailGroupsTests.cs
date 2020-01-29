@@ -24,7 +24,6 @@ namespace EmailGroupsAppv2Tests
       var mockMailGroups = GetMock(data);
       var mockContext = new Mock<TestApplicationDbContext>();
       mockContext.Setup(x => x.MailGroups).Returns(mockMailGroups.Object);
-      mockContext.Setup(x => x.SaveChangesAsync()).Returns(() => Task.Run(() => { return 0; })).Verifiable();
       var testUserAccessor = new TestUserAccessor(userId);
       var service = new MailGroupsController(mockContext.Object, testUserAccessor);
 

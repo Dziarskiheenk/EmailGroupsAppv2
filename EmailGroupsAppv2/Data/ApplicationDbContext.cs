@@ -2,11 +2,7 @@
 using IdentityServer4.EntityFramework.Options;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace EmailGroupsAppv2.Data
@@ -56,15 +52,5 @@ namespace EmailGroupsAppv2.Data
           .HasForeignKey(x => x.OwnerId)
           .OnDelete(DeleteBehavior.Cascade);
     }
-  }
-
-  public interface IApplicationDbContext
-  {
-    DbSet<MailGroup> MailGroups { get; set; }
-    DbSet<MailAddress> MailAddresses { get; set; }
-
-    Task<int> SaveChangesAsync();
-    void MarkMailGroupAsModified(MailGroup mailGroup);
-    void MarkMailAddressAsModified(MailAddress mailAddress);
   }
 }
