@@ -17,5 +17,28 @@ namespace EmailGroupsAppv2.Data
         IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
     {
     }
+    public virtual DbSet<MailGroup> MailGroups { get; set; }
+    public virtual DbSet<MailAddress> MailAddresses { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+      base.OnModelCreating(builder);
+
+      builder.Entity<MailGroup>()
+          .HasIndex(u => u.Name)
+          .IsUnique();
+
+      builder.Entity<MailGroup>()
+          .HasMany(x => x.Addresses)
+          .WithOne(x => x.MailGroup)
+          .HasForeignKey(x => x.GroupId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+      builder.Entity<ApplicationUser>()
+          .HasMany(x => x.MailGroups)
+          .WithOne(x => x.Owner)
+          .HasForeignKey(x => x.OwnerId)
+          .OnDelete(DeleteBehavior.Cascade);
+    }
   }
 }
