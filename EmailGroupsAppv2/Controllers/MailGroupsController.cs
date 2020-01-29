@@ -262,7 +262,8 @@ namespace EmailGroupsAppv2.Controllers
 
     private bool MailGrupIsAccessible(int id)
     {
-      return _context.MailGroups.Any(x => x.Id == id && x.OwnerId != _userAccessor.UserId);
+      string ownerId = _context.MailGroups.Where(x => x.Id == id).Select(x => x.OwnerId).FirstOrDefault();
+      return ownerId == _userAccessor.UserId;
     }
   }
 }
