@@ -37,7 +37,7 @@ export default function MailGroupEdit(props) {
             })
             .catch(err => {
                 debugger;
-                if (err.response.status == 409)
+                if (err.response.status === 409)
                     setInvalidState({ name: true, nameFeedback: 'Name is taken' });
                 else
                     console.error(err);
@@ -54,7 +54,7 @@ export default function MailGroupEdit(props) {
                 toggleModal();
             })
             .catch(err => {
-                if (err.response.status == 409)
+                if (err.response.status === 409)
                     setInvalidState({ name: true, nameFeedback: 'Name is taken' });
                 else
                     console.error(err);

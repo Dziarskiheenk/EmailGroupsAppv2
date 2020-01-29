@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailGroupsAppv2", "EmailGroupsAppv2\EmailGroupsAppv2.csproj", "{FEE73F40-BB6D-410C-B781-64DA95AA637E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailGroupsAppv2", "EmailGroupsAppv2\EmailGroupsAppv2.csproj", "{FEE73F40-BB6D-410C-B781-64DA95AA637E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailGroupsAppv2Tests", "EmailGroupsAppv2Tests\EmailGroupsAppv2Tests.csproj", "{1309FD52-02F8-4ACB-89A2-B1B1874C11AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{FEE73F40-BB6D-410C-B781-64DA95AA637E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEE73F40-BB6D-410C-B781-64DA95AA637E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEE73F40-BB6D-410C-B781-64DA95AA637E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1309FD52-02F8-4ACB-89A2-B1B1874C11AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1309FD52-02F8-4ACB-89A2-B1B1874C11AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1309FD52-02F8-4ACB-89A2-B1B1874C11AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1309FD52-02F8-4ACB-89A2-B1B1874C11AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

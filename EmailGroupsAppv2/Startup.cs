@@ -49,6 +49,7 @@ namespace EmailGroupsAppv2
         configuration.RootPath = "ClientApp/build";
       });
 
+      services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
       services.AddScoped<IUserAccessor, UserAccessor>();
     }
 

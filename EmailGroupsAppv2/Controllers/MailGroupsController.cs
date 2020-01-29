@@ -17,10 +17,10 @@ namespace EmailGroupsAppv2.Controllers
   [Route("api/[controller]")]
   public class MailGroupsController : ControllerBase
   {
-    private readonly ApplicationDbContext _context;
+    private readonly IApplicationDbContext _context;
     private readonly IUserAccessor _userAccessor;
 
-    public MailGroupsController(ApplicationDbContext context, IUserAccessor userAccessor)
+    public MailGroupsController(IApplicationDbContext context, IUserAccessor userAccessor)
     {
       _context = context;
       _userAccessor = userAccessor;
@@ -70,7 +70,7 @@ namespace EmailGroupsAppv2.Controllers
         return Unauthorized();
       }
 
-      _context.Entry(mailGroup).State = EntityState.Modified;
+      _context.MarkMailGroupAsModified(mailGroup);
 
       try
       {
@@ -178,7 +178,7 @@ namespace EmailGroupsAppv2.Controllers
         return Unauthorized();
       }
 
-      _context.Entry(mailAddress).State = EntityState.Modified;
+      _context.MarkMailAddressAsModified(mailAddress);
 
       try
       {

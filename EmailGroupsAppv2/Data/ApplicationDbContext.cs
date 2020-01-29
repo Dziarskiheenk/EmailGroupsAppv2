@@ -2,6 +2,7 @@
 using IdentityServer4.EntityFramework.Options;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -10,15 +11,30 @@ using System.Threading.Tasks;
 
 namespace EmailGroupsAppv2.Data
 {
-  public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
+  public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext
   {
     public ApplicationDbContext(
         DbContextOptions options,
         IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
     {
     }
-    public virtual DbSet<MailGroup> MailGroups { get; set; }
-    public virtual DbSet<MailAddress> MailAddresses { get; set; }
+    public  DbSet<MailGroup> MailGroups { get; set; }
+    public  DbSet<MailAddress> MailAddresses { get; set; }
+
+    public void MarkMailGroupAsModified(MailGroup mailGroup)
+    {
+      base.Entry(mailGroup).State = EntityState.Modified;
+    }
+
+    public void MarkMailAddressAsModified(MailAddress mailAddress)
+    {
+      base.Entry(mailAddress).State = EntityState.Modified;
+    }
+
+    public Task<int> SaveChangesAsync()
+    {
+      return base.SaveChangesAsync();
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -40,5 +56,15 @@ namespace EmailGroupsAppv2.Data
           .HasForeignKey(x => x.OwnerId)
           .OnDelete(DeleteBehavior.Cascade);
     }
+  }
+
+  public interface IApplicationDbContext
+  {
+    DbSet<MailGroup> MailGroups { get; set; }
+    DbSet<MailAddress> MailAddresses { get; set; }
+
+    Task<int> SaveChangesAsync();
+    void MarkMailGroupAsModified(MailGroup mailGroup);
+    void MarkMailAddressAsModified(MailAddress mailAddress);
   }
 }

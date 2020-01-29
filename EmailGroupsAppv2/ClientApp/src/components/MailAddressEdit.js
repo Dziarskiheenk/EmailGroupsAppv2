@@ -41,7 +41,7 @@ export default function MailAddressEdit(props) {
         await axios.put(
             'api/MailGroups/' + mailGroup.id + '/MailAddresses/' + mailAddress.id, mailAddress,
             { headers: !token ? {} : { 'Authorization': `Bearer ${token}` } })
-        const index = mailGroup.addresses.findIndex(x => x.id == mailAddress.id);
+        const index = mailGroup.addresses.findIndex(x => x.id === mailAddress.id);
         mailGroup.addresses = [
             ...mailGroup.addresses.slice(0, index),
             mailAddress,
