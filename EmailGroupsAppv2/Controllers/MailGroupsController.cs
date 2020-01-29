@@ -8,19 +8,22 @@ using Microsoft.EntityFrameworkCore;
 using EmailGroupsAppv2.Models;
 using EmailGroupsAppv2.Data;
 using Microsoft.AspNetCore.Authorization;
+using EmailGroupsAppv2.Services;
 
 namespace EmailGroupsAppv2.Controllers
 {
-  [Route("api/[controller]")]
-  [ApiController]
   [Authorize]
+  [ApiController]
+  [Route("api/[controller]")]
   public class MailGroupsController : ControllerBase
   {
     private readonly ApplicationDbContext _context;
+    private readonly IUserAccessor _userAccessor;
 
-    public MailGroupsController(ApplicationDbContext context)
+    public MailGroupsController(ApplicationDbContext context, IUserAccessor userAccessor)
     {
       _context = context;
+      _userAccessor = userAccessor;
     }
 
     // GET: api/MailGroups
@@ -28,6 +31,7 @@ namespace EmailGroupsAppv2.Controllers
     public async Task<ActionResult<IEnumerable<MailGroup>>> GetMailGroups()
     {
       return await _context.MailGroups
+        .Where(x => x.OwnerId == _userAccessor.UserId)
         .Include(x => x.Addresses)
         .OrderBy(x => x.Name)
         .ToListAsync();
@@ -39,9 +43,9 @@ namespace EmailGroupsAppv2.Controllers
     {
       var mailGroup = await _context.MailGroups.FindAsync(id);
 
-      if (mailGroup == null)
+      if (mailGroup == null || mailGroup.OwnerId != _userAccessor.UserId)
       {
-        return NotFound();
+        return Unauthorized();
       }
 
       return mailGroup;
@@ -53,14 +57,17 @@ namespace EmailGroupsAppv2.Controllers
     [HttpPut("{id}")]
     public async Task<IActionResult> PutMailGroup(int id, MailGroup mailGroup)
     {
+
       if (id != mailGroup.Id)
       {
         return BadRequest();
       }
 
-      if (await _context.MailGroups.AnyAsync(x => x.Name == mailGroup.Name))
+      mailGroup.OwnerId = _userAccessor.UserId;
+
+      if (!MailGrupIsAccessible(id))
       {
-        return Conflict();
+        return Unauthorized();
       }
 
       _context.Entry(mailGroup).State = EntityState.Modified;
@@ -69,11 +76,15 @@ namespace EmailGroupsAppv2.Controllers
       {
         await _context.SaveChangesAsync();
       }
-      catch (DbUpdateConcurrencyException)
+      catch (DbUpdateException)
       {
         if (!MailGroupExists(id))
         {
           return NotFound();
+        }
+        else if (await _context.MailGroups.AnyAsync(x => x.Name == mailGroup.Name && x.Id != mailGroup.Id && mailGroup.OwnerId == mailGroup.OwnerId))
+        {
+          return Conflict();
         }
         else
         {
@@ -90,6 +101,7 @@ namespace EmailGroupsAppv2.Controllers
     [HttpPost]
     public async Task<ActionResult<MailGroup>> PostMailGroup(MailGroup mailGroup)
     {
+      mailGroup.OwnerId = _userAccessor.UserId;
       _context.MailGroups.Add(mailGroup);
       try
       {
@@ -97,7 +109,7 @@ namespace EmailGroupsAppv2.Controllers
       }
       catch (DbUpdateException)
       {
-        if (MailGroupExists(mailGroup.Id))
+        if (MailGroupExists(mailGroup.Name) || MailGroupExists(mailGroup.Id))
         {
           return Conflict();
         }
@@ -119,6 +131,11 @@ namespace EmailGroupsAppv2.Controllers
       if (groupId != mailAddress.GroupId)
       {
         return BadRequest();
+      }
+
+      if (!MailGrupIsAccessible(groupId))
+      {
+        return Unauthorized();
       }
 
       _context.MailAddresses.Add(mailAddress);
@@ -156,6 +173,11 @@ namespace EmailGroupsAppv2.Controllers
         return BadRequest();
       }
 
+      if (!MailGrupIsAccessible(groupId))
+      {
+        return Unauthorized();
+      }
+
       _context.Entry(mailAddress).State = EntityState.Modified;
 
       try
@@ -187,6 +209,11 @@ namespace EmailGroupsAppv2.Controllers
         return NotFound();
       }
 
+      if (!MailGrupIsAccessible(id))
+      {
+        return Unauthorized();
+      }
+
       _context.MailGroups.Remove(mailGroup);
       await _context.SaveChangesAsync();
 
@@ -207,6 +234,11 @@ namespace EmailGroupsAppv2.Controllers
         return BadRequest();
       }
 
+      if (!MailGrupIsAccessible(groupId))
+      {
+        return Unauthorized();
+      }
+
       _context.MailAddresses.Remove(mailAddress);
       await _context.SaveChangesAsync();
 
@@ -215,12 +247,22 @@ namespace EmailGroupsAppv2.Controllers
 
     private bool MailGroupExists(int id)
     {
-      return _context.MailGroups.Any(e => e.Id == id);
+      return _context.MailGroups.Any(e => e.Id == id && e.OwnerId == _userAccessor.UserId);
+    }
+
+    private bool MailGroupExists(string name)
+    {
+      return _context.MailGroups.Any(e => e.Name == name && e.OwnerId == _userAccessor.UserId);
     }
 
     private bool MailAddressExists(int id)
     {
       return _context.MailAddresses.Any(e => e.Id == id);
+    }
+
+    private bool MailGrupIsAccessible(int id)
+    {
+      return _context.MailGroups.Any(x => x.Id == id && x.OwnerId != _userAccessor.UserId);
     }
   }
 }

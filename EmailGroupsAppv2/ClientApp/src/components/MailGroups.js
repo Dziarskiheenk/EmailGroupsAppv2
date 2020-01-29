@@ -3,6 +3,7 @@ import { ListGroup, Button, Row, Col } from 'reactstrap';
 import MailGroupEdit from './MailGroupEdit';
 import axios from "axios";
 import MailGroup from './MailGroup';
+import authService from './api-authorization/AuthorizeService'
 
 export default function MailGroups() {
 
@@ -38,7 +39,10 @@ export default function MailGroups() {
     useEffect(() => {
         const fillMailGroups = async () => {
             setLoading(true);
-            let response = await axios.get('api/MailGroups');
+            const token = await authService.getAccessToken();
+            let response = await axios.get('api/MailGroups', {
+                headers: !token ? {} : { 'Authorization': `Bearer ${token}` }
+            });
             setMailGroups(response.data);
             setLoading(false);
         };

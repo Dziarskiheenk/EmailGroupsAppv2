@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using EmailGroupsAppv2.Services;
 
 namespace EmailGroupsAppv2.Controllers
 {
@@ -21,19 +22,19 @@ namespace EmailGroupsAppv2.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly IUserAccessor userAccessor;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(IUserAccessor userAccessor)
     {
-      _logger = logger;
+      this.userAccessor = userAccessor;
     }
 
     [HttpGet]
     public async Task<IEnumerable<WeatherForecast>> Get()
     {
       var rng = new Random();
-      var test = User.FindFirst(ClaimTypes.Email).Value;
-      var test2 = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+      var test = userAccessor.UserId;
+      //var test2 = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
       return Enumerable.Range(1, 5).Select(index => new WeatherForecast
       {
         Date = DateTime.Now.AddDays(index),

@@ -25,7 +25,7 @@ namespace EmailGroupsAppv2.Data
       base.OnModelCreating(builder);
 
       builder.Entity<MailGroup>()
-          .HasIndex(u => u.Name)
+          .HasIndex(u => new { u.Name, u.OwnerId })
           .IsUnique();
 
       builder.Entity<MailGroup>()

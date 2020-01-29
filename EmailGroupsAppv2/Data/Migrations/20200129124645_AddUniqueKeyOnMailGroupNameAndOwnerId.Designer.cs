@@ -4,14 +4,16 @@ using EmailGroupsAppv2.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EmailGroupsAppv2.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200129124645_AddUniqueKeyOnMailGroupNameAndOwnerId")]
+    partial class AddUniqueKeyOnMailGroupNameAndOwnerId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -128,6 +130,7 @@ namespace EmailGroupsAppv2.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("OwnerId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -135,8 +138,7 @@ namespace EmailGroupsAppv2.Data.Migrations
                     b.HasIndex("OwnerId");
 
                     b.HasIndex("Name", "OwnerId")
-                        .IsUnique()
-                        .HasFilter("[OwnerId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("MailGroups");
                 });
@@ -372,7 +374,8 @@ namespace EmailGroupsAppv2.Data.Migrations
                     b.HasOne("EmailGroupsAppv2.Models.ApplicationUser", "Owner")
                         .WithMany("MailGroups")
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

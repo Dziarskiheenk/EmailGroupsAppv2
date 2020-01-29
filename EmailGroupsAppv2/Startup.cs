@@ -11,6 +11,7 @@ using EmailGroupsAppv2.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using EmailGroupsAppv2.Services;
 
 namespace EmailGroupsAppv2
 {
@@ -47,6 +48,8 @@ namespace EmailGroupsAppv2
       {
         configuration.RootPath = "ClientApp/build";
       });
+
+      services.AddScoped<IUserAccessor, UserAccessor>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

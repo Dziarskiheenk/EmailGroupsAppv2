@@ -5,6 +5,7 @@ import MailGroupEdit from './MailGroupEdit';
 import PropTypes from "prop-types";
 import MailAddressEdit from './MailAddressEdit';
 import axios from 'axios';
+import authService from './api-authorization/AuthorizeService'
 
 export default function MailGroup(props) {
     const { mailGroup, isOpen, onClick, onDeleteGroup, onGroupEdit } = props;
@@ -20,21 +21,23 @@ export default function MailGroup(props) {
         setShowMailAddressEditModal(!showMailAddressEditModal);
     }
 
-    const deleteGroup = () => {
-        axios.delete('api/MailGroups/' + mailGroup.id)
-            .then(() => {
-                onDeleteGroup(mailGroup.id);
-                setShowDeleteQuestion(false)
-            });
+    const deleteGroup = async () => {
+        const token = await authService.getAccessToken();
+        await axios.delete(
+            'api/MailGroups/' + mailGroup.id,
+            { headers: !token ? {} : { 'Authorization': `Bearer ${token}` } });
+        onDeleteGroup(mailGroup.id);
+        setShowDeleteQuestion(false)
     }
 
-    const removeMailAddress = mailAddress => {
-        axios.delete('api/MailGroups/' + mailGroup.id + '/MailAddresses/' + mailAddress.id)
-            .then(() => {
-                const index = mailGroup.addresses.findIndex(x => x.id = mailAddress.id);
-                mailGroup.addresses.splice(index, 1);
-                onGroupEdit(mailGroup);
-            });
+    const removeMailAddress = async mailAddress => {
+        const token = await authService.getAccessToken();
+        axios.delete(
+            'api/MailGroups/' + mailGroup.id + '/MailAddresses/' + mailAddress.id,
+            { headers: !token ? {} : { 'Authorization': `Bearer ${token}` } });
+        const index = mailGroup.addresses.findIndex(x => x.id = mailAddress.id);
+        mailGroup.addresses.splice(index, 1);
+        onGroupEdit(mailGroup);
     }
 
     const [editedMailAddress, setEditedMailAddress] = useState(undefined);

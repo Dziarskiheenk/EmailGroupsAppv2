@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input, FormFeedback } from 'reactstrap';
 import axios from "axios";
 import PropTypes from 'prop-types';
+import authService from './api-authorization/AuthorizeService'
 
 export default function MailGroupEdit(props) {
 
@@ -13,21 +14,29 @@ export default function MailGroupEdit(props) {
     const [invalidState, setInvalidState] = useState({ name: false, nameFeedback: '' });
 
     const validateForm = () => {
-        const nameIsValid = mailGroup.name != undefined;
-        setInvalidState({ name: !nameIsValid, nameFeedback: 'Name is required' });
-        if (!nameIsValid)
+        const nameIsInvalid = !mailGroup.name;
+        setInvalidState({ name: nameIsInvalid, nameFeedback: 'Name is required' });
+        if (nameIsInvalid)
             return false;
         else
             return true;
     }
 
-    const createMailGroup = mailGroup => {
-        axios.post('api/MailGroups', mailGroup)
+    const createMailGroup = async mailGroup => {
+        debugger;
+        const token = await authService.getAccessToken();
+        debugger;
+        axios.post(
+            'api/MailGroups',
+            mailGroup,
+            { headers: !token ? {} : { 'Authorization': `Bearer ${token}` } })
             .then(response => {
+                debugger;
                 onGroupEdit(response.data);
                 toggleModal();
             })
             .catch(err => {
+                debugger;
                 if (err.response.status == 409)
                     setInvalidState({ name: true, nameFeedback: 'Name is taken' });
                 else
@@ -35,8 +44,11 @@ export default function MailGroupEdit(props) {
             });
     }
 
-    const editMailGroup = mailGroup => {
-        axios.put('api/MailGroups/' + mailGroup.id, mailGroup)
+    const editMailGroup = async mailGroup => {
+        const token = await authService.getAccessToken();
+        axios.put(
+            'api/MailGroups/' + mailGroup.id, mailGroup,
+            { headers: !token ? {} : { 'Authorization': `Bearer ${token}` } })
             .then(() => {
                 onGroupEdit(mailGroup);
                 toggleModal();

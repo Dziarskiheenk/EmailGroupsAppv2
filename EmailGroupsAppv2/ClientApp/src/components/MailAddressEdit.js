@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input, FormFeedback } from 'reactstrap';
 import axios from "axios";
+import authService from './api-authorization/AuthorizeService'
 
 export default function MailAddressEdit(props) {
     const { editedMailAddress, toggleModal, mailGroup } = props;
@@ -11,39 +12,42 @@ export default function MailAddressEdit(props) {
     const [invalidState, setInvalidState] = useState({ address: false, name: false, lastName: false });
     const validateForm = () => {
         var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        const addressIsValid = re.test(String(mailAddress.address).toLowerCase());
-        const nameIsValid = mailAddress.name != undefined;
-        const lastNameIsValid = mailAddress.lastName != undefined;
+        const addressIsInvalid = !re.test(String(mailAddress.address).toLowerCase());
+        const nameIsInvalid = !mailAddress.name;
+        const lastNameIsInvalid = !mailAddress.lastName;
         setInvalidState({
-            address: !addressIsValid,
-            name: !nameIsValid,
-            lastName: !lastNameIsValid
+            address: addressIsInvalid,
+            name: nameIsInvalid,
+            lastName: lastNameIsInvalid
         });
-        if (!addressIsValid || !nameIsValid || !lastNameIsValid)
+        if (addressIsInvalid || nameIsInvalid || lastNameIsInvalid)
             return false;
         else
             return true;
     }
 
-    const createMailAddress = () => {
-        axios.post('api/MailGroups/' + mailGroup.id + '/MailAddresses', mailAddress)
-            .then(response => {
-                mailGroup.addresses.push(response.data)
-                toggleModal();
-            });
+    const createMailAddress = async () => {
+        const token = await authService.getAccessToken();
+        let response = await axios.post(
+            'api/MailGroups/' + mailGroup.id + '/MailAddresses',
+            mailAddress,
+            { headers: !token ? {} : { 'Authorization': `Bearer ${token}` } });
+        mailGroup.addresses.push(response.data)
+        toggleModal();
     }
 
-    const updateMailAddress = () => {
-        axios.put('api/MailGroups/' + mailGroup.id + '/MailAddresses/' + mailAddress.id, mailAddress)
-            .then(() => {
-                const index = mailGroup.addresses.findIndex(x => x.id == mailAddress.id);
-                mailGroup.addresses = [
-                    ...mailGroup.addresses.slice(0, index),
-                    mailAddress,
-                    ...mailGroup.addresses.slice(index + 1, mailGroup.addresses.length)
-                ];
-                toggleModal();
-            });
+    const updateMailAddress = async () => {
+        const token = await authService.getAccessToken();
+        await axios.put(
+            'api/MailGroups/' + mailGroup.id + '/MailAddresses/' + mailAddress.id, mailAddress,
+            { headers: !token ? {} : { 'Authorization': `Bearer ${token}` } })
+        const index = mailGroup.addresses.findIndex(x => x.id == mailAddress.id);
+        mailGroup.addresses = [
+            ...mailGroup.addresses.slice(0, index),
+            mailAddress,
+            ...mailGroup.addresses.slice(index + 1, mailGroup.addresses.length)
+        ];
+        toggleModal();
     }
 
     return (
